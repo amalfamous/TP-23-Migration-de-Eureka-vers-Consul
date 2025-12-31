@@ -5,9 +5,42 @@ spring:
   application:
     name: Gateway
   cloud:
-    discovery:
-      enabled: true
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        service-name: Gateway
+        health-check-path: /actuator/health
+        health-check-interval: 15s
+        health-check-timeout: 3s
+        health-check-critical-timeout: 30s
+        prefer-ip-address: true
+        instance-id: ${spring.application.name}:${server.port}
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: service-client
+          uri: lb://SERVICE-CLIENT
+          predicates:
+            - Path=/SERVICE-CLIENT/**
+          filters:
+            - StripPrefix=1
+        - id: service-car
+          uri: lb://SERVICE-CAR
+          predicates:
+            - Path=/SERVICE-CAR/**
+          filters:
+            - StripPrefix=1
 
-eureka:
-  instance:
-    hostname: localhost
+# Configuration Actuator pour les health checks
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+  endpoint:
+    health:
+      show-details: always

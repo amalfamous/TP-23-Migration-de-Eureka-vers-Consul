@@ -4,6 +4,18 @@ server:
 spring:
   application:
     name: SERVICE-CAR
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        service-name: SERVICE-CAR
+        health-check-path: /actuator/health
+        health-check-interval: 15s
+        health-check-timeout: 3s
+        health-check-critical-timeout: 30s
+        prefer-ip-address: true
+        instance-id: ${spring.application.name}:${server.port}
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/carservicedb?createDatabaseIfNotExist=true
@@ -13,4 +25,16 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
 
+# Activer les endpoints actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
